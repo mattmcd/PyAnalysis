@@ -13,3 +13,8 @@ viewer.describe()
 import mda.tutorial as tut
 from mda.tutorial import * #Adds times2 and pandastut 
 print tut.times2.times2(5)
+
+# Read datasets from website for 'Elements of Statistical Learning'
+from mda.read.esl import data
+ds = data.read( 'prostate', '\t')
+ds.describe()
