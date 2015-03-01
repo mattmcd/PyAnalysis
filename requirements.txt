@@ -6,3 +6,4 @@ pandas==0.15.2
 scipy==0.14.0
 sympy==0.7.6
 Quandl==2.8.3
+antlr4-python2-runtime # For ANTLR grammars

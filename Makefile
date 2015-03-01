@@ -1,8 +1,8 @@
 all: edit
 
 install:
-	pip -r requirements.txt
+	pip install -r requirements.txt
 
 edit:
-	ipython qtconsole --pylab inline --quiet &
+	ipython qtconsole --pylab inline --quiet > /dev/null 2>&1 &
 	vim demo.py
