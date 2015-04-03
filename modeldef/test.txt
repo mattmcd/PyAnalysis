@@ -1,0 +1,1 @@
+Run backtest GBP on A b C reporting stats
