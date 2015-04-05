@@ -10,9 +10,9 @@ viewer.head(3)
 viewer.describe()
 
 # Package management
-import mda.tutorial as tut
+import mda.tutorial.tut as tut
 from mda.tutorial import * #Adds times2 and pandastut 
-print tut.times2.times2(5)
+print tut.times2(5)
 
 # Read datasets from website for 'Elements of Statistical Learning'
 from mda.read.esl import data
