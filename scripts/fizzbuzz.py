@@ -4,14 +4,12 @@
 def fizzbuzz(x):
     if (x % 3 == 0) and (x % 5 == 0):
         return "FizzBuzz"
+    elif x % 3 == 0:
+        return "Fizz"
+    elif x % 5 ==0:
+        return "Buzz"
     else:
-        if x % 3 == 0:
-            return "Fizz"
-        else:
-            if x % 5 ==0:
-                return "Buzz"
-            else:
-                return x
+        return x
     
 #  Generic version: define a set of predicate functions 
 p1 = lambda(x): x % 3 == 0
