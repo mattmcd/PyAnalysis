@@ -69,3 +69,10 @@ def most_common_interests_with(user):
     id_list = map( lambda interest: users_dict[interest], user_interests)
     all_ids = filter(lambda x: x!= user["id"], reduce( lambda acc, ids: acc+ids, id_list, []))
     return Counter(all_ids)
+    
+# Find topics of interest
+topic_count = map( lambda k: (k.lower(), len(users_dict[k])), users_dict.keys())
+topic_dict = defaultdict(int)
+for topic, count in topic_count: 
+    topic_dict[topic] += count
+Counter(topic_dict)
