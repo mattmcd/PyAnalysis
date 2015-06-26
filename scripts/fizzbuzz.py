@@ -31,3 +31,13 @@ def mkFizzBuzz(lst):
     return aux
 
 fizzbuzz2 = mkFizzBuzz(fbLst)
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1:
+        n = int(sys.argv[1])
+    else: 
+        n = 20
+    for k in (fizzbuzz2(i) for i in range(1,n+1)):
+        print k,
+    
