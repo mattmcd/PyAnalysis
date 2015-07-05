@@ -1,22 +1,24 @@
-all: ModelDef.class ModelDefParser.py
+all: java/ModelDefParser.class mdef/ModelDefParser.py
 
-ModelDefParser.java: ModelDef.g4
-	antlr4 ModelDef.g4
+java/ModelDefParser.java: ModelDef.g4
+	antlr4 -o java ModelDef.g4
 
-ModelDef.class: ModelDefParser.java
-	javac ModelDef*.java
+java/ModelDefParser.class: java/ModelDefParser.java
+	javac java/ModelDef*.java
 
-ModelDefParser.py: ModelDef.g4
-	antlr4 -Dlanguage=Python2 ModelDef.g4
+mdef/ModelDefParser.py: ModelDef.g4
+	antlr4 -o mdef -Dlanguage=Python2 ModelDef.g4
+	touch mdef/__init__.py # Create mdef package
 
-generatedFiles = ModelDefLexer.* ModelDefParser.* ModelDefListener.* ModelDefBaseListener.*
+generatedFiles = {ModelDefLexer,ModelDefParser,ModelDefListener,ModelDefBaseListener}
 
 clean:
-	rm -f $(generatedFiles) *.class *.tokens
+	rm -f java/*
+	rm -f mdef/*
 
 grun= java org.antlr.v4.runtime.misc.TestRig
-test: ModelDef.class
-	$(grun) ModelDef modeldef -tokens test.txt
+test: java/ModelDefParser.class
+	$(grun) ModelDef modeldef -tokens ../test.txt
 
 testpy: ModelDef.g4 program.py
 	python program.py
