@@ -1,14 +1,15 @@
 from __future__ import division
 import numpy as np
 
+
 def sorted_qr(A):
     """Sorted QR decomposition following Wubben 2001
-    Performs a QR decomposition with permutation such that the 
-    diagonal elements of R are decreasing.  
+    Performs a QR decomposition with permutation such that the
+    diagonal elements of R are decreasing.
     One use of this is in Lattice Reduction using the LLL algorithm
     as it reduces the processing requried.
 
-    Parameters 
+    Parameters
     ----------
     A - square matrix
 
@@ -21,11 +22,11 @@ def sorted_qr(A):
     """
     nCols = np.size(A, 1)
     Q = A.copy()
-    R = np.zeros( Q.shape )
+    R = np.zeros(Q.shape)
     p = np.arange(nCols)
     for i in range(nCols):
         # Find column with minimum norm
-        minInd = i + np.argsort( np.sqrt( sum(Q[:, i:]**2, )))[0]
+        minInd = i + np.argsort(np.sqrt(sum(Q[:, i:]**2, 0)))[0]
         # Swap columns i and minInd
         p[[i, minInd]] = p[[minInd, i]]
         Q[:, [i, minInd]] = Q[:, [minInd, i]]
@@ -38,7 +39,8 @@ def sorted_qr(A):
             Q[:, j] = Q[:, j] - R[i, j]*Q[:, i]
     return Q, R, p
 
-def lattice_reduce(A, delta = 0.75):
+
+def lattice_reduce(A, delta=0.75):
     """Lenstra-Lenstra-Lovasz (LLL) reduction
     Find short basis vectors for a given matrix
 
@@ -54,7 +56,7 @@ def lattice_reduce(A, delta = 0.75):
     """
 
     # Matrix must be square
-    assert (np.array(A.shape) == len(A)).all() 
+    assert (np.array(A.shape) == len(A)).all()
     Q, R, p = sorted_qr(A)
     m = len(A)
     T = np.eye(len(A))[:, p]
@@ -82,9 +84,3 @@ def lattice_reduce(A, delta = 0.75):
 
     B_ = Q.dot(R)
     return B_, T
-
-
-
-
-
-
