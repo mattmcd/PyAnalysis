@@ -1,6 +1,12 @@
 from __future__ import division
 import numpy as np
 
+"""Lattice reduction algorithms
+Code from 'Lattice Reduction: A survey with applications in wireless
+communications', Wubben, Seethaler, Jalden and Matz
+IEE Signal Processing Magazine (70) May 2011
+and references therein.
+"""
 
 def sorted_qr(A):
     """Sorted QR decomposition following Wubben 2001
@@ -22,7 +28,7 @@ def sorted_qr(A):
     """
     nCols = np.size(A, 1)
     Q = A.copy()
-    R = np.zeros(Q.shape)
+    R = np.zeros((Q.shape[1],Q.shape[1])) # nCols x nCols
     p = np.arange(nCols)
     for i in range(nCols):
         # Find column with minimum norm
@@ -55,11 +61,9 @@ def lattice_reduce(A, delta=0.75):
     T - unimodular matrix such that A_ = AT
     """
 
-    # Matrix must be square
-    assert (np.array(A.shape) == len(A)).all()
     Q, R, p = sorted_qr(A)
-    m = len(A)
-    T = np.eye(len(A))[:, p]
+    m = A.shape[1]
+    T = np.eye(m)[:, p]
     k = 1
 
     while k < m:
@@ -84,3 +88,20 @@ def lattice_reduce(A, delta=0.75):
 
     B_ = Q.dot(R)
     return B_, T
+
+
+def lattice_det(A):
+    """Lattice determinant of a m x n matrix
+    Calculates L = sqrt(det(B.T.dot(B)))
+    """
+    
+    return np.sqrt(np.linalg.det(A.T.dot(A)))
+
+
+def orth_defect(A):
+    """Orthogonality defect of m x n matrix
+    Equal to product of the column norms divided by lattice determinant.
+    """
+    
+    col_norms = map(np.linalg.norm, A.T)
+    return np.prod(col_norms) / lattice_det(A)
