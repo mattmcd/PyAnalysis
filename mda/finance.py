@@ -8,18 +8,29 @@ import urllib2
 
 class LseReader:
 
-    def __init__(self):
+    def __init__(self, interval=60, period=10):
         dataLoc = '/home/mattmcd/Work/Data/'
         ftseFile =  dataLoc + 'FTSE100.csv'
 
         self.ftse100 = pd.read_csv( ftseFile )
         self.prefixURL = 'https://www.google.com/finance/getprices?'
+        self.interval = interval
+        self.period = period
 
-    def read_history(self, ticker, interval=300, period=10):
+    def read_url(self, ticker, interval=None, period=None):
         """Read intraday history for selected ticker on LSE"""
-        txt = urllib2.urlopen(self.prefixURL +
-                              'q={Ticker}&x=LON&i={Interval}&p={Period}d&f=d,o,h,l,c,v'.format(
+        if not interval:
+            interval = self.interval
+        if not period:
+            period = self.period
+
+        txt = urllib2.urlopen((self.prefixURL +
+                              'q={Ticker}&x=LON&i={Interval}' +
+                              '&p={Period}d&f=d,o,h,l,c,v').format(
             Ticker=ticker, Interval=interval, Period=period)).read()
+        return txt, interval
+
+    def parse_text(self, txt, interval):
         lines = txt.split('\n')
         cols = lines[4].lower().split('=')[1].split(',')
         recs  = [dict(zip(cols, line.split(','))) for line in lines[7:-1]]
@@ -42,7 +53,22 @@ class LseReader:
 
         return df
 
+    def read_history(self, ticker, interval=None, period=None):
+        txt, interval = self.read_url(ticker, interval, period)
+        df = self.parse_text(txt, interval)
+        return df
 
-reader = LseReader()
-tickers = reader.ftse100.Ticker
-df = reader.read_history(tickers[0])
+
+def get_all():
+    reader = LseReader()
+    save_loc = '/home/mattmcd/Work/Data/20151024/'
+    for ticker in reader.ftse100.Ticker.values:
+        txt, interval = reader.read_url(ticker)
+        with open(save_loc + ticker + '.txt', 'wb') as f:
+            f.write(txt)
+
+if __name__ == "__main__":
+    reader = LseReader()
+    tickers = reader.ftse100.Ticker
+    df = reader.read_history(tickers[0])
+
