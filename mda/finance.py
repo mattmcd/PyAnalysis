@@ -2,6 +2,8 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 import urllib2
+import time
+import os
 
 # __author__ = 'mattmcd'
 
@@ -61,7 +63,10 @@ class LseReader:
 
 def get_all():
     reader = LseReader()
-    save_loc = '/home/mattmcd/Work/Data/20151024/'
+    save_loc = ('/home/mattmcd/Work/Data/' + 
+        time.strftime("%Y%m%d") + '/')
+    if not os.path.isdir(save_loc):
+        os.mkdir(save_loc)
     for ticker in reader.ftse100.Ticker.values:
         txt, interval = reader.read_url(ticker)
         with open(save_loc + ticker + '.txt', 'wb') as f:
