@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from scipy.cluster.hierarchy import dendrogram, linkage
 import ggplot as gg
+import networkx as nx
 
 """Python version of the 'Analyzing networks of characters in "Love Actually"'
 [blog post|http://varianceexplained.org/r/love-actually-network] by David Robinson"""
@@ -102,26 +103,48 @@ def order_scenes(scenes, ordering=None):
 
 
 def plot_timeline(scenes):
-    # Plot character vs scene timetime
+    # Plot character vs scene timelime
+    # NB: due to limitations in Python ggplot we need to plot with scene on y-axis
+    # in order to label x-ticks by character.
+    # scale_x_continuous and scale_y_continuous behave slightly differently.
 
-    # TODO: y axis tick marks to use character names
-    # + gg.scale_y_continuous(labels=scenes['character'].cat.categories.values)
-    # TODO: vertical lines linking characters within scene
-    # + gg.geom_path(aes(gg.group='scene')) # Python ggplot aes does not have group
-    print (gg.ggplot(gg.aes(x='scene', y='character_code'), data=scenes) +
-            gg.geom_point()  + gg.ylab('Character'))
+    print (gg.ggplot(gg.aes(y='scene', x='character_code'), data=scenes) +
+            gg.geom_point() + gg.labs(x='Character', y='Scene') +
+           gg.scale_x_continuous(
+               labels=scenes['character'].cat.categories.values.tolist(),
+           breaks=range(len(scenes['character'].cat.categories))) +
+           gg.theme(axis_text_x=gg.element_text(angle=30, hjust=1, size=10)))
 
 
-def plot_heatmap(speaker_scene_matrix, ordering=None):
-    # Plot coccurence matrix for scenes with less than 10 characters
+def get_cooccurrence_matrix(speaker_scene_matrix, ordering=None):
+    # Co-occurrence matrix for the characters, ignoring last scene where all are present
     scene_ind = speaker_scene_matrix.astype(bool).sum() < 10
-    plt.figure()
     if ordering:
         mat = speaker_scene_matrix.loc[ordering, scene_ind]
-        plt.pcolor(mat.dot(mat.T))
     else:
         mat = speaker_scene_matrix.loc[:, scene_ind]
-        plt.pcolor(mat.dot(mat.T))
+    return mat.dot(mat.T)
+
+
+def plot_heatmap(cooccur_mat):
+    # Plot co-ccurrence matrix as heatmap
+    plt.figure()
+    plt.pcolor(cooccur_mat)
+
+
+def plot_network(cooccur_mat):
+    # Plot co-occurence matrix as network diagram
+    G = nx.Graph(cooccur_mat.values)
+    pos = nx.graphviz_layout(G)  # NB: needs pydot installed
+    plt.figure()
+    nx.draw_networkx_nodes(G, pos, node_size=700, node_color='c')
+    nx.draw_networkx_edges(G, pos)
+    nx.draw_networkx_labels(
+        G, pos,
+        labels={i: s for (i, s) in enumerate(cooccur_mat.index.values)},
+        font_size=10)
+    plt.axis('off')
+    plt.show()
 
 
 def run():
@@ -137,9 +160,12 @@ def run():
     ordering = plot_dendrogram(speaker_scene_matrix)
     print(ordering)
     # Order the scenes by cluster leaves order
-    scenes = order_scenes( get_scenes_with_multiple_characters(by_speaker_scene), ordering)
+    scenes = order_scenes(get_scenes_with_multiple_characters(by_speaker_scene), ordering)
     # Plot a timeline of characters vs scene
     plot_timeline(scenes)
-    # Plot heatmap of cocurrence matrix
-    plot_heatmap(speaker_scene_matrix, ordering)
-    return by_speaker_scene, speaker_scene_matrix, ordering, scenes
+    # Plot heatmap of co-occurrence matrix
+    cooccur_mat = get_cooccurrence_matrix(speaker_scene_matrix, ordering)
+    plot_heatmap(cooccur_mat)
+    # Plot network graph of co-occurrence matrix
+    plot_network(cooccur_mat)
+    return by_speaker_scene, speaker_scene_matrix, ordering, scenes, cooccur_mat
