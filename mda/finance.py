@@ -18,7 +18,7 @@ class LseReader:
         :return: LseReader
         """
         dataLoc = '/home/mattmcd/Work/Data/FTSE100'
-        ftseFile = dataLoc + 'FTSE100.csv'
+        ftseFile = dataLoc + '/FTSE100.csv'
 
         self.ftse100 = pd.read_csv( ftseFile )
         self.prefixURL = 'https://www.google.com/finance/getprices?'
@@ -94,8 +94,3 @@ def get_all():
         except:
             pass
 
-
-if __name__ == "__main__":
-    reader = LseReader()
-    tickers = reader.ftse100.Ticker
-    df = reader.read_history(tickers[0])
