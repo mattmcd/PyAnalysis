@@ -8,6 +8,9 @@ from tqdm import tqdm
 
 __author__ = 'mattmcd'
 
+dataLoc = os.path.join(os.environ.get('MDA_DATA_DIR'), 'FTSE100')
+ftseFile = os.path.join(dataLoc, 'FTSE100.csv')
+
 
 class LseReader:
 
@@ -17,8 +20,6 @@ class LseReader:
         :param period: period in days to download
         :return: LseReader
         """
-        dataLoc = '/home/mattmcd/Work/Data/FTSE100'
-        ftseFile = dataLoc + '/FTSE100.csv'
 
         self.ftse100 = pd.read_csv( ftseFile )
         self.prefixURL = 'https://www.google.com/finance/getprices?'
@@ -83,13 +84,13 @@ def get_all():
     :return: <none> Creates saved text files
     """
     reader = LseReader()
-    save_loc = ('/home/mattmcd/Work/Data/FTSE100/' + time.strftime("%Y%m%d") + '/')
+    save_loc = os.path.join(dataLoc, time.strftime("%Y%m%d"))
     if not os.path.isdir(save_loc):
         os.mkdir(save_loc)
-    for ticker in tqdm(reader.ftse100.Ticker.values):
+    for ticker in tqdm(reader.ftse100.ticker.values):
         try:
             txt, interval = reader.read_url(ticker)
-            with open(save_loc + ticker + '.txt', 'wb') as f:
+            with open(os.path.join(save_loc, ticker + '.txt'), 'wb') as f:
                 f.write(txt)
         except:
             pass
