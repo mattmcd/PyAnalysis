@@ -1,9 +1,10 @@
 # numpy==1.9.1 #Install manually with pip install numpy
 # PySide       #Install manually with pip install PySide.  Takes 30min.
 ipython[all]
-matplotlib==1.4.2
-pandas==0.15.2
-scipy==0.15.1
-sympy==0.7.6
-Quandl==2.8.3
+matplotlib
+pandas
+scipy
+sympy
+Quandl
 antlr4-python2-runtime # For ANTLR grammars
+celery
