@@ -1,14 +1,6 @@
-FROM continuumio/miniconda
+FROM mattmcd/pcr 
 
 MAINTAINER Matt McDonnell "matt@matt-mcdonnell.com"
-
-RUN conda install pandas
-
-RUN pip install tqdm
-
-RUN pip install boto3
-
-RUN conda install fabric
 
 ENV MDA_DATA_DIR /home/ubuntu/Work/Data
 
