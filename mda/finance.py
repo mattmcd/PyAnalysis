@@ -4,6 +4,8 @@ import pandas as pd
 import urllib2
 import time
 import os
+import re
+import boto3
 from tqdm import tqdm
 
 __author__ = 'mattmcd'
@@ -79,12 +81,17 @@ def parse_text(txt, interval):
     return df
 
 
-def get_all():
+def get_all(do_copy=False):
     """Get last 10 days of 1 minute intraday data from FTSE 100
-    :return: <none> Creates saved text files
+    Args:
+        do_copy: copy downloaded files to S3
+
+    Returns:
+        <none> Creates saved text files
     """
     reader = LseReader()
-    save_loc = os.path.join(dataLoc, time.strftime("%Y%m%d"))
+    download_date = time.strftime("%Y%m%d")
+    save_loc = os.path.join(dataLoc, download_date)
     if not os.path.isdir(save_loc):
         os.mkdir(save_loc)
     for ticker in tqdm(reader.ftse100.ticker.values):
@@ -94,4 +101,28 @@ def get_all():
                 f.write(txt)
         except:
             pass
+    if do_copy:
+        copy_to_s3(download_date)
 
+
+def get_download_dates():
+    """Get list of downloaded dates
+    :return: list of dates
+    """
+    dirs = filter(lambda s: re.match('\d{8}', s), os.listdir(dataLoc))
+    return dirs
+
+
+def copy_to_s3(download_date=None):
+    """Copy downloaded files to S3
+    :return: <none> Creates files on S3
+    """
+    dest_bucket = 'ftse100'
+    files = os.listdir(os.path.join(dataLoc, download_date))
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(dest_bucket)
+    if dest_bucket not in map(lambda b: b.name, s3.buckets.all()):
+        bucket.create(CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
+    for fname in files:
+        bucket.upload_file(os.path.join(dataLoc, download_date, fname),
+                           'raw/' + download_date + '/' + fname)
