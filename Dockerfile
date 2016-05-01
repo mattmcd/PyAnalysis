@@ -10,5 +10,5 @@ WORKDIR /home/ubuntu/Work
 
 COPY . /home/ubuntu/Work/PyAnalysis
 
-CMD ["python", "/home/ubuntu/Work/PyAnalysis/download_intraday.py"]
+CMD ["python", "/home/ubuntu/Work/PyAnalysis/download_intraday.py", "--do-copy"]
 
