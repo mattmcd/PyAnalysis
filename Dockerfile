@@ -2,6 +2,8 @@ FROM mattmcd/pcr
 
 MAINTAINER Matt McDonnell "matt@matt-mcdonnell.com"
 
+ENV HOME /home/ubuntu
+
 ENV MDA_DATA_DIR /home/ubuntu/Work/Data
 
 RUN mkdir -p /home/ubuntu/Work
