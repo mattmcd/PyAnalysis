@@ -2,6 +2,7 @@ import mda
 import urllib2
 import numpy as np
 import pandas as pd
+import os
 
 ftseFile = mda.data_dir('FTSE100', 'FTSE100.csv')
 
@@ -48,12 +49,13 @@ class LseReader:
         return df
 
 
-def parse_text(txt, interval):
+def parse_text(txt, interval, ticker=None):
     lines = txt.split('\n')
     cols = lines[4].lower().split('=')[1].split(',')
     recs = [dict(zip(cols, line.split(','))) for line in lines[7:-1]]
     df = pd.DataFrame(recs, columns=cols)
-    df[cols[1:]] = df[cols[1:]].convert_objects(convert_numeric=True)
+    for col in cols[1:]:
+        df[col] = pd.to_numeric(df[col])
     dates = np.zeros(df.date.shape, dtype=pd.Timestamp)
     last_date = pd.Timestamp(0)
     for i, date_str in enumerate(df.date):
@@ -67,6 +69,18 @@ def parse_text(txt, interval):
             this_date = last_date + pd.to_timedelta(int(date_str) * interval, unit='s')
             dates[i] = this_date
     df['date'] = dates
-    df.index = df.date
+    if ticker:
+        df['ticker'] = ticker
 
     return df
+
+
+def read_file(ticker_file, datestr, interval=60):
+    with open(mda.data_dir('FTSE100', datestr, ticker_file)) as f:
+        return parse_text(f.read(), interval, ticker=ticker_file.split('.')[0])
+
+
+def read_dir(datestr, interval=60):
+    return pd.concat(
+        [read_file(f, datestr, interval)
+         for f in os.listdir(mda.data_dir('FTSE100', datestr))])
