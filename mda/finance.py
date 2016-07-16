@@ -7,6 +7,8 @@ from tqdm import tqdm
 import mda
 from mda.io.google_finance import LseReader
 from mda.io.s3 import S3Proxy
+import boto3
+
 
 __author__ = 'mattmcd'
 
@@ -48,26 +50,60 @@ def get_s3(download_date):
     return s3
 
 
-def update_local(download_date):
+def update_local(download_date=None):
     """Update local cache of data
     Parameters
     ----------
-    download_date
+    download_date: YYYYMMDD date to retrieve from S3
+        If None defaults to retrieving all dates not present in local cache
 
     Returns
     -------
 
     """
-    s3 = get_s3(download_date)
-    s3.get()
+    if download_date is None:
+        local_dates = get_download_dates()
+        remote_dates = get_download_dates(local=False)
+        missing_dates = remote_dates - local_dates
+        for date in tqdm(missing_dates):
+            update_local(date)
+    else:
+        s3 = get_s3(download_date)
+        s3.get()
 
 
-def get_download_dates():
+def get_download_dates(local=True):
     """Get list of downloaded dates
     :return: list of dates
     """
-    dirs = sorted(filter(lambda s: re.match('\d{8}', s), os.listdir(dataLoc)))
-    return dirs
+    if local:
+        dates = set(sorted(filter(
+            lambda s: re.match('\d{8}', s), os.listdir(dataLoc))))
+    else:
+        # Get download dates from S3
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket('ftse100')
+        lst = bucket.objects.filter(Prefix='raw')
+        dates = set([item.key.split('/')[1] for item in lst])
+    return dates
+
+
+def calc_return_index(df, base_ind=0):
+    """Convert price indexes into return index normalized to some base row
+    Parameters
+    ----------
+    df: dataframe of ohlc data
+    base_ind: row index to use for normalizing prices, default 0
+
+    Returns
+    -------
+    dataframe of price indexes normalized by return
+    """
+    px_close = df.set_index(['date', 'ticker'])['close'].unstack()
+    returns = px_close.pct_change().fillna(0)
+    ret_index = (1 + returns).cumprod()
+    ret_index = ret_index.div(ret_index.iloc[base_ind, :], axis=1)
+    return ret_index
 
 
 def plot_returns(df=None, date=None, base_ind=0, n=10):
@@ -89,10 +125,7 @@ def plot_returns(df=None, date=None, base_ind=0, n=10):
         from mda.io.google_finance import read_dir
         df = read_dir(date)
 
-    px_close = df.set_index(['date', 'ticker'])['close'].unstack()
-    returns = px_close.pct_change().fillna(0)
-    ret_index = (1 + returns).cumprod()
-    ret_index = ret_index.div(ret_index.iloc[base_ind, :], axis=1)
+    ret_index = calc_return_index(df, base_ind=base_ind)
     px_end = ret_index.iloc[-1, :].sort_values(ascending=False)
     top_bottom = np.append(px_end.index[:n].values,
                            px_end.index[-n:].values)
