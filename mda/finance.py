@@ -34,18 +34,67 @@ def get_all(do_copy=False):
         except:
             pass
     if do_copy:
-        proxy_args = {
-            'bucket': 'ftse100',
-            'local_dir': mda.data_dir('FTSE100', download_date),
-            'prefix': 'raw/' + download_date + '/'
-        }
-        s3 = S3Proxy(**proxy_args)
+        s3 = get_s3(download_date)
         s3.put()
+
+
+def get_s3(download_date):
+    proxy_args = {
+        'bucket': 'ftse100',
+        'local_dir': mda.data_dir('FTSE100', download_date),
+        'prefix': 'raw/' + download_date + '/'
+    }
+    s3 = S3Proxy(**proxy_args)
+    return s3
+
+
+def update_local(download_date):
+    """Update local cache of data
+    Parameters
+    ----------
+    download_date
+
+    Returns
+    -------
+
+    """
+    s3 = get_s3(download_date)
+    s3.get()
 
 
 def get_download_dates():
     """Get list of downloaded dates
     :return: list of dates
     """
-    dirs = filter(lambda s: re.match('\d{8}', s), os.listdir(dataLoc))
+    dirs = sorted(filter(lambda s: re.match('\d{8}', s), os.listdir(dataLoc)))
     return dirs
+
+
+def plot_returns(df=None, date=None, base_ind=0, n=10):
+    """Plot return index from closing price time series for top/bottom n stocks
+
+    Parameters
+    ----------
+    df: ohlc stock data
+    date: date to retrieve if stock data not present
+    base_ind: row index to use for normalizing prices, default 0
+    n: top/bottom n stocks will be plotted
+
+    Returns
+    -------
+
+    """
+    import numpy as np
+    if df is None:
+        from mda.io.google_finance import read_dir
+        df = read_dir(date)
+
+    px_close = df.set_index(['date', 'ticker'])['close'].unstack()
+    returns = px_close.pct_change().fillna(0)
+    ret_index = (1 + returns).cumprod()
+    ret_index = ret_index.div(ret_index.iloc[base_ind, :], axis=1)
+    px_end = ret_index.iloc[-1, :].sort_values(ascending=False)
+    top_bottom = np.append(px_end.index[:n].values,
+                           px_end.index[-n:].values)
+
+    ret_index.reset_index()[top_bottom].plot()
