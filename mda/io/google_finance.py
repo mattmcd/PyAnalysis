@@ -66,8 +66,11 @@ def parse_text(txt, interval, ticker=None):
             dates[i] = last_date
         else:
             # Offset
-            this_date = last_date + pd.to_timedelta(int(date_str) * interval, unit='s')
-            dates[i] = this_date
+            try:
+                this_date = last_date + pd.to_timedelta(int(date_str) * interval, unit='s')
+                dates[i] = this_date
+            except ValueError as ex:
+                print(ticker + ': ' + ex.message)
     df['date'] = dates
     if ticker:
         df['ticker'] = ticker
@@ -80,7 +83,25 @@ def read_file(ticker_file, datestr, interval=60):
         return parse_text(f.read(), interval, ticker=ticker_file.split('.')[0])
 
 
-def read_dir(datestr, interval=60):
+def read_dir(datestr, interval=60, print_date=False):
+    if print_date:
+        print(datestr)
     return pd.concat(
         [read_file(f, datestr, interval)
          for f in os.listdir(mda.data_dir('FTSE100', datestr))])
+
+
+def read_dates(dates=None, start_date=None, end_date=None, print_date=False):
+    if dates is None:
+        from mda.finance import get_download_dates
+        dates = get_download_dates()
+    if start_date:
+        dates = sorted(filter(lambda d: d >= start_date, dates))
+    if end_date:
+        dates = sorted(filter(lambda d: d < end_date, dates))
+    df = reduce(lambda acc, el: [
+        pd.concat(acc + [read_dir(el, print_date=print_date)],
+                  axis=0).drop_duplicates()],
+                dates[1:],
+                [read_dir(dates[0], print_date=print_date)])[0]
+    return df

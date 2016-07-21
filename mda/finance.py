@@ -64,7 +64,7 @@ def update_local(download_date=None):
     if download_date is None:
         local_dates = get_download_dates()
         remote_dates = get_download_dates(local=False)
-        missing_dates = remote_dates - local_dates
+        missing_dates = set(remote_dates) - set(local_dates)
         for date in tqdm(missing_dates):
             update_local(date)
     else:
@@ -77,14 +77,14 @@ def get_download_dates(local=True):
     :return: list of dates
     """
     if local:
-        dates = set(sorted(filter(
-            lambda s: re.match('\d{8}', s), os.listdir(dataLoc))))
+        dates = sorted(filter(
+            lambda s: re.match('\d{8}', s), os.listdir(dataLoc)))
     else:
         # Get download dates from S3
         s3 = boto3.resource('s3')
         bucket = s3.Bucket('ftse100')
         lst = bucket.objects.filter(Prefix='raw')
-        dates = set([item.key.split('/')[1] for item in lst])
+        dates = sorted([item.key.split('/')[1] for item in lst])
     return dates
 
 
