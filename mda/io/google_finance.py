@@ -96,9 +96,9 @@ def read_dates(dates=None, start_date=None, end_date=None, print_date=False):
         from mda.finance import get_download_dates
         dates = get_download_dates()
     if start_date:
-        dates = sorted(filter(lambda d: d >= start_date, dates))
+        dates = sorted([d for d in dates if d >= start_date])
     if end_date:
-        dates = sorted(filter(lambda d: d < end_date, dates))
+        dates = sorted([d for d in dates if d < end_date])
     df = reduce(lambda acc, el: [
         pd.concat(acc + [read_dir(el, print_date=print_date)],
                   axis=0).drop_duplicates()],
