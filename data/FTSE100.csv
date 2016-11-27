@@ -2,10 +2,9 @@ ticker,name,premium_code,free_code
 ADN,Aberdeen Asset Management,,GOOG/LON_ADN
 ADM,Admiral Group,EOD/ADM,GOOG/LON_ADM
 AGK,Aggreko,,GOOG/LON_AGK
-AMEC,AMEC,,GOOG/LON_AMEC
+AMFW,AMEC,,GOOG/LON_AMEC
 AAL,Anglo American plc,EOD/AAL,GOOG/LON_AAL
 ANTO,Antofagasta,,GOOG/LON_ANTO
-ARM,ARM Holdings,,GOOG/LON_ARM
 ABF,Associated British Foods,,GOOG/LON_ABF
 AZN,AstraZeneca,EOD/AZN,GOOG/LON_AZN
 AV,Aviva,EOD/AV,
@@ -15,10 +14,10 @@ BARC,Barclays,,GOOG/LON_BARC
 BG,BG Group,EOD/BG,
 BLT,BHP Billiton,EOD/BLT,GOOG/LON_BLT
 BP,BP,EOD/BP,
-BTI,British American Tobacco,EOD/BTI,
+BATS,British American Tobacco,EOD/BTI,
 BLND,British Land Co,,GOOG/LON_BLND
 BSY,BSkyB,,GOOG/LON_BSY
-BT_A,BT Group,,GOOG/LON_BT_A
+BT.A,BT Group,,GOOG/LON_BT_A
 BNZL,Bunzl,,GOOG/LON_BNZL
 BRBY,Burberry Group,,GOOG/LON_BRBY
 CPI,Capita,EOD/CPI,GOOG/LON_CPI
@@ -41,13 +40,14 @@ HMSO,Hammerson,,GOOG/LON_HMSO
 HL,Hargreaves Lansdown,EOD/HL,
 HSBA,HSBC,,GOOG/LON_HSBA
 IMI,IMI plc,EOD/IMI,GOOG/LON_IMI
-IMT,Imperial Tobacco Group,,GOOG/LON_IMT
+IMB,Imperial Tobacco Group,,GOOG/LON_IMT
 IHG,InterContinental Hotels Group,EOD/IHG,GOOG/LON_IHG
 IAG,International Consolidated Airlines Group SA,EOD/IAG,GOOG/LON_IAG
 ITRK,Intertek Group,,GOOG/LON_ITRK
 ITV,ITV plc,,GOOG/LON_ITV
 SBRY,J Sainsbury plc,,GOOG/LON_SBRY
 JMAT,Johnson Matthey,,GOOG/LON_JMAT
+KAZ,KAZ Minerals plc,,GOOG/LON_KAZ
 KGF,Kingfisher plc,,GOOG/LON_KGF
 LAND,Land Securities Group,EOD/LAND,GOOG/LON_LAND
 LGEN,Legal & General,,GOOG/LON_LGEN
@@ -94,6 +94,6 @@ VOD,Vodafone Group,EOD/VOD,GOOG/LON_VOD
 WEIR,Weir Group,,GOOG/LON_WEIR
 WTB,Whitbread,,GOOG/LON_WTB
 WOS,Wolseley plc,,GOOG/LON_WOS
-WG_,Wood Group,,GOOG/LON_WG_
+WG,Wood Group,,GOOG/LON_WG_
 WPP,WPP plc,EOD/WPP,GOOG/LON_WPP
 XTA,Xstrata,,GOOG/LON_XTA
