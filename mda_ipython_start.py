@@ -10,3 +10,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import boto3
+
+
+pd.set_option('display.expand_frame_repr', False)
