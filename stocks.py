@@ -1,6 +1,21 @@
 import argparse
+import numpy as np
+import pandas as pd
 from mda.finance import get_all, update_local, get_download_dates
 from mda.io.google_finance import read_dir
+
+
+def traded_analysis():
+    # Look at traded value - %paste into console
+    from mda.io.google_finance import read_dates
+    from mda.analysis.finance import normalize_periods, fraction_traded
+    start_date = '20160623'
+    end_date = '20160626'
+    df = read_dates(start_date=start_date, end_date=end_date)
+    normalize_periods(df)
+    df_frac_traded = fraction_traded(df[df.date.between('2016-06-23', '2016-06-26')], True)
+    cols = df_frac_traded.columns[np.argsort(df_frac_traded.iloc[-1]).tolist()][-1::-1].tolist()
+    df_frac_traded.loc[:, cols[:20]].cumsum(axis=1).plot()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='FTSE100 data retrieval and analysis')
