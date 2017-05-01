@@ -129,10 +129,16 @@ def read_dates(dates=None, start_date=None, end_date=None, print_date=False):
     if start_date:
         dates = sorted([d for d in dates if d >= start_date])
     if end_date:
+        # Need to look for the first date after the end_date
+        # to get data up to and including the end date
+        later_dates = sorted([d for d in dates if d >= end_date])
         dates = sorted([d for d in dates if d < end_date])
+        if later_dates:
+            dates.append(later_dates[0])
     df = reduce(lambda acc, el: [
         pd.concat(acc + [read_dir(el, print_date=print_date)],
                   axis=0).drop_duplicates()],
                 dates[1:],
                 [read_dir(dates[0], print_date=print_date)])[0]
+    df = df[df.date.between(start_date, end_date)].copy()
     return df
