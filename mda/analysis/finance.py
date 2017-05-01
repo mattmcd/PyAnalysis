@@ -1,3 +1,49 @@
+import numpy as np
+import pandas as pd
+
+
+def normalize_periods(df):
+    """Normalize number of intervals since market open
+       Assume first full minute of trading on LSE finishes at 08:01 local time.
+       (Original Google data uses number of intervals since first timestamp for a stock,
+       which occasionally can be 08:00)
+    
+    Args:
+        df: dataframe of OHLC data.  Must have date and tz_offset (minutes) columns
+
+    Returns:
+        None, modifies dataframe argument
+    """
+    df['period'] = (
+        df.date - (
+            df.date.dt.floor('D') + pd.Timedelta(8, 'h') + pd.Timedelta(60, 's') -
+            df.tz_offset.map(lambda x: pd.Timedelta(x, 'm')))) / pd.Timedelta(1, 'm')
+
+
+def fraction_traded(df_in, cumulative=False):
+    """Trading volume in each stock in terms of overall value traded
+    
+    Args:
+        df_in: OHLC data
+        cumulative: use cumulative traded value instead of considering each interval 
+            Default False
+
+    Returns:
+        df_frac_traded - fraction of trading that each stock's traded value represents 
+    """
+    df = df_in.reset_index().copy()
+    df.set_index(['date', 'period', 'ticker'], inplace=True)
+    df['value_traded'] = df.close * df.volume / 100
+    df_traded = df.value_traded.unstack().fillna(0)
+    if cumulative:
+        # Cumulative value traded
+        df_traded = df_traded.cumsum()
+    df_frac_traded = pd.DataFrame(df_traded.values / df_traded.sum(axis=1).values[:, None], index=df_traded.index,
+                                  columns=df_traded.columns)
+    df_frac_traded.fillna(0, inplace=True)
+    return df_frac_traded
+
+
 def calc_return_index(df, base_ind=0):
     """Convert price indexes into return index normalized to some base row
     Parameters
@@ -30,7 +76,6 @@ def plot_returns(df=None, date=None, base_ind=0, n=10):
     -------
 
     """
-    import numpy as np
     if df is None:
         from mda.io.google_finance import read_dir
         df = read_dir(date)
